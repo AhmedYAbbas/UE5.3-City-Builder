@@ -27,14 +27,14 @@ public:
 	UInputAction* OrbitInput;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* ZoomInput;
-
-	/*UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* PitchInput;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* FreeRoamInput;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UInputAction* SetFreeRoamInput;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* EnableFreeRoamInput;
+
+	/*UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* PlaceBuildingInput;*/
 
 };

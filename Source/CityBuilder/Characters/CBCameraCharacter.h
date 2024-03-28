@@ -31,7 +31,13 @@ private:
 	UFUNCTION()
 	void Orbit(const FInputActionValue& Value);
 	UFUNCTION()
+	void Pitch(const FInputActionValue& Value);
+	UFUNCTION()
 	void Zoom(const FInputActionValue& Value);
+	UFUNCTION()
+	void FreeRoam(const FInputActionValue& Value);
+
+	void UpdateMovementSpeed();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")

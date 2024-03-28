@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ACBCameraCharacter::ACBCameraCharacter()
 {
@@ -24,7 +25,9 @@ ACBCameraCharacter::ACBCameraCharacter()
 void ACBCameraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	InitialMovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	UpdateMovementSpeed();
 }
 
 void ACBCameraCharacter::Move(const FInputActionValue& Value)
@@ -32,14 +35,14 @@ void ACBCameraCharacter::Move(const FInputActionValue& Value)
 	if (Controller)
 	{
 		const FVector MoveValue = Value.Get<FVector>();
-		FRotator MovementRotation(0.f, GetControlRotation().Yaw, 0.f);
-		if (MoveValue.X != 0.f)
+		const FRotator MovementRotation(0.f, GetControlRotation().Yaw, 0.f);
+		if (MoveValue.X)
 		{
 			const FVector Direction = MovementRotation.RotateVector(FVector::ForwardVector);
 			AddMovementInput(Direction, MoveValue.X);
 		}
 
-		if (MoveValue.Y != 0.f)
+		if (MoveValue.Y)
 		{
 			const FVector Direction = MovementRotation.RotateVector(FVector::RightVector);
 			AddMovementInput(Direction, MoveValue.Y);
@@ -52,9 +55,24 @@ void ACBCameraCharacter::Orbit(const FInputActionValue& Value)
 	if (Controller)
 	{
 		const float OrbitValue = Value.Get<float>();
-		if (OrbitValue != 0.f)
+		if (OrbitValue)
 		{
 			AddControllerYawInput(OrbitValue * OrbitSpeed);
+		}
+	}
+}
+
+void ACBCameraCharacter::Pitch(const FInputActionValue& Value)
+{
+	if (Controller)
+	{
+		const float PitchValue = Value.Get<float>();
+		if (PitchValue)
+		{
+			FRotator SpringArmRotation = SpringArm->GetComponentRotation();
+			SpringArmRotation.Pitch += PitchValue * PitchSpeed;
+			SpringArmRotation.Pitch = FMath::ClampAngle(SpringArmRotation.Pitch, MinPitch, MaxPitch);
+			SpringArm->SetWorldRotation(SpringArmRotation);
 		}
 	}
 }
@@ -64,13 +82,37 @@ void ACBCameraCharacter::Zoom(const FInputActionValue& Value)
 	if (Controller)
 	{
 		const float ZoomValue = Value.Get<float>();
-		if (ZoomValue != 0.f)
+		if (ZoomValue)
 		{
-			float ModifiedArmLength = (ZoomValue * ZoomSpeed) + SpringArm->TargetArmLength;
-			float ClampedArmLength = FMath::Clamp(ModifiedArmLength, MinZoom, MaxZoom);
+			const float DesiredArmLength = (ZoomValue * ZoomSpeed) + SpringArm->TargetArmLength;
+			const float ClampedArmLength = FMath::Clamp(DesiredArmLength, MinZoom, MaxZoom);
 			SpringArm->TargetArmLength = ClampedArmLength;
+			UpdateMovementSpeed();
 		}
 	}
+}
+
+void ACBCameraCharacter::FreeRoam(const FInputActionValue& Value)
+{
+	if (Controller)
+	{
+		const FVector FreeRoamValue = Value.Get<FVector>();
+		if (FreeRoamValue.X)
+		{
+			Orbit(FreeRoamValue.X);
+		}
+
+		if (FreeRoamValue.Y)
+		{
+			Pitch(FreeRoamValue.Y);
+		}
+	}
+}
+
+void ACBCameraCharacter::UpdateMovementSpeed()
+{
+	const float ArmLength = SpringArm->TargetArmLength;
+	GetCharacterMovement()->MaxWalkSpeed = (ArmLength / MinZoom) * InitialMovementSpeed;
 }
 
 void ACBCameraCharacter::Tick(float DeltaTime)
@@ -98,6 +140,8 @@ void ACBCameraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 					PEI->BindAction(PlayerController->InputData->MoveInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::Move);
 					PEI->BindAction(PlayerController->InputData->OrbitInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::Orbit);
 					PEI->BindAction(PlayerController->InputData->ZoomInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::Zoom);
+					PEI->BindAction(PlayerController->InputData->PitchInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::Pitch);
+					PEI->BindAction(PlayerController->InputData->FreeRoamInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::FreeRoam);
 				}
 			}
 		}
