@@ -33,8 +33,7 @@ public:
 	UInputAction* FreeRoamInput;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* EnableFreeRoamInput;
-
-	/*UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UInputAction* PlaceBuildingInput;*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* PlaceInput;
 
 };

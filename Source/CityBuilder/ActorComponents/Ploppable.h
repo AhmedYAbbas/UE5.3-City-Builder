@@ -4,18 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Clickable.generated.h"
+#include "Ploppable.generated.h"
 
-class UStaticMeshComponent;
 class UMaterialInterface;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class CITYBUILDER_API UClickable : public UActorComponent
+class CITYBUILDER_API UPloppable : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UClickable();
+	UPloppable();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
@@ -23,19 +22,16 @@ protected:
 
 private:
 	UFUNCTION()
-	void OnMouseClicked(AActor* TouchedActor, FKey ButtonPressed);
-	UFUNCTION()
-	void OnMouseHover(AActor* TouchedActor);
-	UFUNCTION()
-	void OnMouseHoverEnd(AActor* TouchedActor);
+	void OnOverlapStateChanged(AActor* OverlappedActor, AActor* OtherActor);
+
+	void UpdateState();
+
+public:
+	bool bPlacementValid = false;
 
 private:
-	UPROPERTY()
-	UStaticMeshComponent* StaticMeshRef;
 	UPROPERTY(EditDefaultsOnly)
-	UMaterialInterface* ClickedMaterial;
+	UMaterialInterface* PloppableMaterial;
 	UPROPERTY(EditDefaultsOnly)
-	UMaterialInterface* UnclickedMaterial;
-
-	bool bClicked = false;
+	UMaterialInterface* InvalidPloppableMaterial;
 };

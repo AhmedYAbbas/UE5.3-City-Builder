@@ -9,6 +9,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 class ACBPlayerController;
+class ACBBuilding;
+
 struct FInputActionValue;
 
 UCLASS()
@@ -36,14 +38,18 @@ private:
 	void Zoom(const FInputActionValue& Value);
 	UFUNCTION()
 	void FreeRoam(const FInputActionValue& Value);
+	UFUNCTION()
+	void SpawnBuilding(const FInputActionValue& Value);
 
 	void UpdateMovementSpeed();
+	void SetPlacementMode(bool bEnable);
+	void UpdatePlacement();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float OrbitSpeed = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float InitialMovementSpeed;
+	float InitialMovementSpeed = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float ZoomSpeed = 20.0f;
@@ -61,10 +67,17 @@ protected:
 
 private:
 	UPROPERTY()
-	ACBPlayerController* PlayerController;
+	ACBPlayerController* PlayerController = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
+
+	UPROPERTY()
+	AActor* PloppableBuilding = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "Buildings")
+	TSubclassOf<ACBBuilding> BuildingBlueprint;
+
+	bool bPlacementMode = false;
 };

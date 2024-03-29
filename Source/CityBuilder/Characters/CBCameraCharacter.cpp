@@ -4,6 +4,9 @@
 #include "CBCameraCharacter.h"
 #include "CityBuilder/Controllers/CBPlayerController.h"
 #include "CityBuilder/Input/InputConfigDataAsset.h"
+#include "CityBuilder/Actors/CBBuilding.h"
+#include "CityBuilder/ActorComponents/Clickable.h"
+#include "CityBuilder/ActorComponents/Ploppable.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -28,6 +31,8 @@ void ACBCameraCharacter::BeginPlay()
 
 	InitialMovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	UpdateMovementSpeed();
+
+	SetPlacementMode(true);
 }
 
 void ACBCameraCharacter::Move(const FInputActionValue& Value)
@@ -115,10 +120,84 @@ void ACBCameraCharacter::UpdateMovementSpeed()
 	GetCharacterMovement()->MaxWalkSpeed = (ArmLength / MinZoom) * InitialMovementSpeed;
 }
 
+void ACBCameraCharacter::SetPlacementMode(bool bEnable)
+{
+	if (bPlacementMode == bEnable)
+	{
+		return;
+	}
+	
+	bPlacementMode = bEnable;
+	if (bPlacementMode)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			PloppableBuilding = World->SpawnActor(BuildingBlueprint);
+			if (ACBBuilding* Building = Cast<ACBBuilding>(PloppableBuilding))
+			{
+				Building->Clickable->DestroyComponent();
+			}
+		}
+	}
+	else
+	{
+		if (PloppableBuilding)
+		{
+			PloppableBuilding->Destroy();
+		}
+	}
+}
+
+void ACBCameraCharacter::UpdatePlacement()
+{
+	FVector WorldLocation;
+	FVector WorldDirection;
+	PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
+
+	if (const UWorld* World = GetWorld())
+	{
+		FHitResult HitResult;
+		FVector Start = WorldLocation;
+		FVector End = (WorldDirection * 1000000.f) + WorldLocation;
+		World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_GameTraceChannel1);
+		if (HitResult.bBlockingHit)
+		{
+			PloppableBuilding->SetActorLocation(HitResult.Location);
+		}
+	}
+}
+
+void ACBCameraCharacter::SpawnBuilding(const FInputActionValue& Value)
+{
+	if (bPlacementMode)
+	{
+		if (ACBBuilding* Building = Cast<ACBBuilding>(PloppableBuilding))
+		{
+			if (Building->Ploppable && Building->Ploppable->bPlacementValid)
+			{
+				if (UWorld* World = GetWorld())
+				{
+					const FTransform& Transform = PloppableBuilding->GetActorTransform();
+					AActor* SpawnedBuilding = World->SpawnActor(BuildingBlueprint, &Transform);
+					if (ACBBuilding* ConstructedBuilding = Cast<ACBBuilding>(SpawnedBuilding))
+					{
+						ConstructedBuilding->Ploppable->DestroyComponent();
+					}
+					//SetPlacementMode(false);
+				}
+			}
+		}
+	}
+}
+
 void ACBCameraCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bPlacementMode)
+	{
+		UpdatePlacement();
+	}
 }
 
 void ACBCameraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -142,6 +221,7 @@ void ACBCameraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 					PEI->BindAction(PlayerController->InputData->ZoomInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::Zoom);
 					PEI->BindAction(PlayerController->InputData->PitchInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::Pitch);
 					PEI->BindAction(PlayerController->InputData->FreeRoamInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::FreeRoam);
+					PEI->BindAction(PlayerController->InputData->PlaceInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::SpawnBuilding);
 				}
 			}
 		}
