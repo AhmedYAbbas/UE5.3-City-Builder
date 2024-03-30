@@ -7,12 +7,14 @@
 #include "CityBuilder/Actors/CBBuilding.h"
 #include "CityBuilder/ActorComponents/Clickable.h"
 #include "CityBuilder/ActorComponents/Ploppable.h"
+#include "Citybuilder/Actors/CBGridManager.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ACBCameraCharacter::ACBCameraCharacter()
 {
@@ -33,6 +35,16 @@ void ACBCameraCharacter::BeginPlay()
 	UpdateMovementSpeed();
 
 	SetPlacementMode(true);
+}
+
+void ACBCameraCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bPlacementMode)
+	{
+		UpdatePlacement();
+	}
 }
 
 void ACBCameraCharacter::Move(const FInputActionValue& Value)
@@ -158,11 +170,13 @@ void ACBCameraCharacter::UpdatePlacement()
 	{
 		FHitResult HitResult;
 		FVector Start = WorldLocation;
-		FVector End = (WorldDirection * 1000000.f) + WorldLocation;
+		FVector End = (WorldDirection * 10000.f) + WorldLocation;
 		World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_GameTraceChannel1);
 		if (HitResult.bBlockingHit)
 		{
-			PloppableBuilding->SetActorLocation(HitResult.Location);
+			ACBGridManager* GridManager = Cast<ACBGridManager>(UGameplayStatics::GetActorOfClass(this, ACBGridManager::StaticClass()));
+			const FVector Location = GridManager->GetClosestGridPosition(HitResult.Location);
+			PloppableBuilding->SetActorLocation(Location);
 		}
 	}
 }
@@ -187,16 +201,6 @@ void ACBCameraCharacter::SpawnBuilding(const FInputActionValue& Value)
 				}
 			}
 		}
-	}
-}
-
-void ACBCameraCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (bPlacementMode)
-	{
-		UpdatePlacement();
 	}
 }
 

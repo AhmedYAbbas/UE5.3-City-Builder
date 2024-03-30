@@ -8,6 +8,7 @@
 
 class UClickable;
 class UPloppable;
+class UMaterialInterface;
 
 UCLASS()
 class CITYBUILDER_API ACBBuilding : public AActor
