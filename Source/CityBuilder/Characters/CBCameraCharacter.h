@@ -10,6 +10,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class ACBPlayerController;
 class ACBBuilding;
+class ACBGridManager;
 
 struct FInputActionValue;
 
@@ -68,6 +69,8 @@ protected:
 private:
 	UPROPERTY()
 	ACBPlayerController* PlayerController = nullptr;
+	UPROPERTY()
+	ACBGridManager* GridManager = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;

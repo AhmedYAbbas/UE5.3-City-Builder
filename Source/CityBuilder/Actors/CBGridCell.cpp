@@ -7,6 +7,7 @@ ACBGridCell::ACBGridCell()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	Neighbours.SetNum(4);
 }
 
 void ACBGridCell::BeginPlay()
@@ -21,3 +22,17 @@ void ACBGridCell::Tick(float DeltaTime)
 
 }
 
+void ACBGridCell::SetOccupied(EBuildingType BuildingType, AActor* Occupying)
+{
+	bOccupied = true;
+	OccupyingType = BuildingType;
+	OccupyingActor = Occupying;
+
+	for (auto Cell : Neighbours)
+	{
+		if (Cell)
+		{
+			Cell->DebugShowOccupiedNeighbours();
+		}
+	}
+}

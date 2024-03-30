@@ -8,6 +8,7 @@
 #include "CityBuilder/ActorComponents/Clickable.h"
 #include "CityBuilder/ActorComponents/Ploppable.h"
 #include "Citybuilder/Actors/CBGridManager.h"
+#include "CityBuilder/Actors/CBGridCell.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -31,9 +32,10 @@ void ACBCameraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GridManager = Cast<ACBGridManager>(UGameplayStatics::GetActorOfClass(this, ACBGridManager::StaticClass()));
 	InitialMovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
-	UpdateMovementSpeed();
 
+	UpdateMovementSpeed();
 	SetPlacementMode(true);
 }
 
@@ -174,9 +176,11 @@ void ACBCameraCharacter::UpdatePlacement()
 		World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_GameTraceChannel1);
 		if (HitResult.bBlockingHit)
 		{
-			ACBGridManager* GridManager = Cast<ACBGridManager>(UGameplayStatics::GetActorOfClass(this, ACBGridManager::StaticClass()));
-			const FVector Location = GridManager->GetClosestGridPosition(HitResult.Location);
-			PloppableBuilding->SetActorLocation(Location);
+			if (GridManager)
+			{
+				const FVector Location = GridManager->GetClosestGridCell(HitResult.Location)->GetActorLocation();
+				PloppableBuilding->SetActorLocation(Location);
+			}
 		}
 	}
 }
@@ -193,6 +197,12 @@ void ACBCameraCharacter::SpawnBuilding(const FInputActionValue& Value)
 				{
 					const FTransform& Transform = PloppableBuilding->GetActorTransform();
 					AActor* SpawnedBuilding = World->SpawnActor(BuildingBlueprint, &Transform);
+
+					if (GridManager)
+					{
+						GridManager->GetClosestGridCell(Transform.GetLocation())->SetOccupied(EBuildingType::Placed, SpawnedBuilding);
+					}
+
 					if (ACBBuilding* ConstructedBuilding = Cast<ACBBuilding>(SpawnedBuilding))
 					{
 						ConstructedBuilding->Ploppable->DestroyComponent();

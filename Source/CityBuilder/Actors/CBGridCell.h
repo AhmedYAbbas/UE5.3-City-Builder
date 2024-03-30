@@ -2,9 +2,13 @@
 
 #pragma once
 
+#include "CityBuilder/CityBuilder.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "CBGridCell.generated.h"
+
+class DebugMaterial;
 
 UCLASS()
 class CITYBUILDER_API ACBGridCell : public AActor
@@ -15,6 +19,22 @@ public:
 	ACBGridCell();
 	virtual void Tick(float DeltaTime) override;
 
+	void SetOccupied(EBuildingType BuildingType, AActor* Occupying);
+
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DebugShowOccupiedNeighbours();
+
+public:
+	TArray<ACBGridCell*> Neighbours;
+
+private:
+	UPROPERTY()
+	AActor* OccupyingActor;
+
+	bool bOccupied = false;
+	EBuildingType OccupyingType;
 };
+

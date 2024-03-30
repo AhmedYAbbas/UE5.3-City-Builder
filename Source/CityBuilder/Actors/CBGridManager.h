@@ -17,13 +17,14 @@ public:
 	ACBGridManager();
 	virtual void Tick(float DeltaTime) override;
 
-	FVector GetClosestGridPosition(const FVector& InPos);
+	ACBGridCell* GetClosestGridCell(const FVector& InPos);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	void PopulateGrid();
+	void PopulateGridCellNeighbours();
 
 private:
 	UPROPERTY(EditDefaultsOnly)
