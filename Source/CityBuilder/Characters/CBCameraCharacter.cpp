@@ -9,6 +9,9 @@
 #include "CityBuilder/ActorComponents/Ploppable.h"
 #include "Citybuilder/Actors/CBGridManager.h"
 #include "CityBuilder/Actors/CBGridCell.h"
+#include "CityBuilder/Actors/CBPlaceableBase.h"
+#include "CityBuilder/Actors/CBRoadManager.h"
+#include "CityBuilder/Actors/CBRoadTile.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -33,6 +36,7 @@ void ACBCameraCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	GridManager = Cast<ACBGridManager>(UGameplayStatics::GetActorOfClass(this, ACBGridManager::StaticClass()));
+	RoadManager = Cast<ACBRoadManager>(UGameplayStatics::GetActorOfClass(this, ACBRoadManager::StaticClass()));
 	InitialMovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
 
 	UpdateMovementSpeed();
@@ -146,18 +150,18 @@ void ACBCameraCharacter::SetPlacementMode(bool bEnable)
 	{
 		if (UWorld* World = GetWorld())
 		{
-			PloppableBuilding = World->SpawnActor(BuildingBlueprint);
-			if (ACBBuilding* Building = Cast<ACBBuilding>(PloppableBuilding))
+			PlaceableActor = Cast<ACBPlaceableBase>(World->SpawnActor(PlaceableActorBlueprint));
+			if (PlaceableActor)
 			{
-				Building->Clickable->DestroyComponent();
+				PlaceableActor->Clickable->DestroyComponent();
 			}
 		}
 	}
 	else
 	{
-		if (PloppableBuilding)
+		if (PlaceableActor)
 		{
-			PloppableBuilding->Destroy();
+			PlaceableActor->Destroy();
 		}
 	}
 }
@@ -179,7 +183,7 @@ void ACBCameraCharacter::UpdatePlacement()
 			if (GridManager)
 			{
 				const FVector Location = GridManager->GetClosestGridCell(HitResult.Location)->GetActorLocation();
-				PloppableBuilding->SetActorLocation(Location);
+				PlaceableActor->SetActorLocation(Location);
 			}
 		}
 	}
@@ -189,23 +193,30 @@ void ACBCameraCharacter::SpawnBuilding(const FInputActionValue& Value)
 {
 	if (bPlacementMode)
 	{
-		if (ACBBuilding* Building = Cast<ACBBuilding>(PloppableBuilding))
+		if (PlaceableActor)
 		{
-			if (Building->Ploppable && Building->Ploppable->bPlacementValid)
+			if (PlaceableActor->Ploppable && PlaceableActor->Ploppable->bPlacementValid)
 			{
 				if (UWorld* World = GetWorld())
 				{
-					const FTransform& Transform = PloppableBuilding->GetActorTransform();
-					AActor* SpawnedBuilding = World->SpawnActor(BuildingBlueprint, &Transform);
-
-					if (GridManager)
+					const FTransform& Transform = PlaceableActor->GetActorTransform();
+					if (ACBPlaceableBase* PlacedActor = Cast<ACBPlaceableBase>(World->SpawnActor(PlaceableActorBlueprint, &Transform)))
 					{
-						GridManager->GetClosestGridCell(Transform.GetLocation())->SetOccupied(EBuildingType::Placed, SpawnedBuilding);
-					}
+						if (GridManager)
+						{
+							ACBGridCell* Cell = GridManager->GetClosestGridCell(Transform.GetLocation());
+							PlacedActor->SetGridCellRef(Cell);
+							Cell->SetOccupied(PlacedActor->GetBuildingType(), PlacedActor);
+						}
 
-					if (ACBBuilding* ConstructedBuilding = Cast<ACBBuilding>(SpawnedBuilding))
-					{
-						ConstructedBuilding->Ploppable->DestroyComponent();
+						if (RoadManager)
+						{
+							if (ACBRoadTile* RoadTile = Cast<ACBRoadTile>(PlacedActor))
+							{
+								RoadManager->AddRoadTile(RoadTile);
+							}
+						}
+						PlacedActor->Ploppable->DestroyComponent();
 					}
 					//SetPlacementMode(false);
 				}

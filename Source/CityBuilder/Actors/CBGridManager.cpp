@@ -7,13 +7,12 @@
 ACBGridManager::ACBGridManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void ACBGridManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	PopulateGrid();
 	PopulateGridCellNeighbours();
 }
@@ -26,7 +25,7 @@ void ACBGridManager::Tick(float DeltaTime)
 
 ACBGridCell* ACBGridManager::GetClosestGridCell(const FVector& InPos)
 {
-	float ClosestDistance = FVector::DistSquared(InPos, GridArray[0]->GetActorLocation());
+	float ClosestDistance = INT32_MAX;
 	int32 CellIndex = 0;
 	for (int32 i = 0; i < GridArray.Num(); i++)
 	{
@@ -59,8 +58,10 @@ void ACBGridManager::PopulateGrid()
 
 			if (UWorld* World = GetWorld())
 			{
-				ACBGridCell* Cell = Cast<ACBGridCell>(World->SpawnActor(GridCell, &CellLocation));
-				GridArray.Add(Cell);
+				if (ACBGridCell* Cell = Cast<ACBGridCell>(World->SpawnActor(GridCell, &CellLocation)))
+				{
+					GridArray.Add(Cell);
+				}
 			}
 		}
 	}
@@ -71,27 +72,27 @@ void ACBGridManager::PopulateGridCellNeighbours()
 	for (int32 i = 0; i < GridArray.Num(); i++)
 	{
 		// North = 0
-		if (i + GridSize < GridArray.Num())
-		{
-			GridArray[i]->Neighbours[0] = GridArray[i + GridSize];
-		}
-
-		// East = 1
 		if ((i + 1) % GridSize != 0)
 		{
-			GridArray[i]->Neighbours[1] = GridArray[i + 1];
+			GridArray[i]->Neighbours[0] = GridArray[i + 1];
 		}
-
-		// South = 2
-		if (i - GridSize >= 0)
+		
+		// East = 1
+		if (i + GridSize < GridArray.Num())
 		{
-			GridArray[i]->Neighbours[2] = GridArray[i - GridSize];
+			GridArray[i]->Neighbours[1] = GridArray[i + GridSize];
+		}
+		
+		// South = 2
+		if (i % GridSize != 0)
+		{
+			GridArray[i]->Neighbours[2] = GridArray[i - 1];
 		}
 
 		// West = 3
-		if (i % GridSize != 0)
+		if (i - GridSize >= 0)
 		{
-			GridArray[i]->Neighbours[3] = GridArray[i - 1];
+			GridArray[i]->Neighbours[3] = GridArray[i - GridSize];
 		}
 	}
 }

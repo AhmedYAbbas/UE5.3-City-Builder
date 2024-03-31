@@ -7,6 +7,8 @@
 #include "Ploppable.generated.h"
 
 class UMaterialInterface;
+class ACBGridManager;
+class ACBGridCell;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CITYBUILDER_API UPloppable : public UActorComponent
@@ -21,15 +23,17 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UFUNCTION()
-	void OnOverlapStateChanged(AActor* OverlappedActor, AActor* OtherActor);
-
 	void UpdateState();
+	void RoadPlaceableCheck(ACBGridCell* InGridCell);
+	void DisablePlacementAtJunction(ACBGridCell* CenterCell, int FirstCorner, int SecondCorner);
 
 public:
 	bool bPlacementValid = false;
 
 private:
+	UPROPERTY()
+	ACBGridManager* GridManager;
+
 	UPROPERTY(EditDefaultsOnly)
 	UMaterialInterface* PloppableMaterial;
 	UPROPERTY(EditDefaultsOnly)

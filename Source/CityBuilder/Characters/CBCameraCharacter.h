@@ -11,6 +11,8 @@ class UCameraComponent;
 class ACBPlayerController;
 class ACBBuilding;
 class ACBGridManager;
+class ACBPlaceableBase;
+class ACBRoadManager;
 
 struct FInputActionValue;
 
@@ -71,6 +73,8 @@ private:
 	ACBPlayerController* PlayerController = nullptr;
 	UPROPERTY()
 	ACBGridManager* GridManager = nullptr;
+	UPROPERTY()
+	ACBRoadManager* RoadManager = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;
@@ -78,9 +82,9 @@ private:
 	UCameraComponent* Camera;
 
 	UPROPERTY()
-	AActor* PloppableBuilding = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category = "Buildings")
-	TSubclassOf<ACBBuilding> BuildingBlueprint;
+	ACBPlaceableBase* PlaceableActor = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "Placeables")
+	TSubclassOf<ACBPlaceableBase> PlaceableActorBlueprint;
 
 	bool bPlacementMode = false;
 };

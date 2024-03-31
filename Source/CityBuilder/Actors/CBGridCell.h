@@ -20,6 +20,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetOccupied(EBuildingType BuildingType, AActor* Occupying);
+	bool IsOccupied() const { return bOccupied; }
+	EBuildingType GetOccupyingType() const { return OccupyingType; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -28,6 +30,7 @@ protected:
 	void DebugShowOccupiedNeighbours();
 
 public:
+	UPROPERTY(BlueprintReadOnly)
 	TArray<ACBGridCell*> Neighbours;
 
 private:
