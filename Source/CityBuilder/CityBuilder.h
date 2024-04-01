@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 
 UENUM(BlueprintType)
-enum class EBuildingType
+enum class EBuildingType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Zoned UMETA(DisplayName = "Zoned"),

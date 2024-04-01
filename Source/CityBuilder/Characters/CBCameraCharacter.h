@@ -27,6 +27,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+	void OnPlacementInfoUpdated(TSubclassOf<ACBPlaceableBase> PlaceableActorType, EBuildingType InPlaceableMode);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,6 +49,7 @@ private:
 
 	void UpdateMovementSpeed();
 	void SetPlacementMode(bool bEnable);
+	void RefreshPlaceableActor();
 	void UpdatePlacement();
 
 protected:
@@ -87,4 +91,5 @@ private:
 	TSubclassOf<ACBPlaceableBase> PlaceableActorBlueprint;
 
 	bool bPlacementMode = false;
+	EBuildingType PlaceableBuildingType;
 };

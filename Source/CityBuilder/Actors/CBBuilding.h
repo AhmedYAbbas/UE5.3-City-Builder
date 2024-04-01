@@ -3,15 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "CBPlaceableBase.h"
 #include "CBBuilding.generated.h"
 
-class UClickable;
-class UPloppable;
-class UMaterialInterface;
-
 UCLASS()
-class CITYBUILDER_API ACBBuilding : public AActor
+class CITYBUILDER_API ACBBuilding : public ACBPlaceableBase
 {
 	GENERATED_BODY()
 	
@@ -21,16 +17,4 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	UClickable* Clickable;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	UPloppable* Ploppable;
-
-private:
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* DefaultSceneRoot;
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* StaticMesh;
 };

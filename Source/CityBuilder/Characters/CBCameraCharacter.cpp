@@ -40,7 +40,7 @@ void ACBCameraCharacter::BeginPlay()
 	InitialMovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
 
 	UpdateMovementSpeed();
-	SetPlacementMode(true);
+	//SetPlacementMode(true);
 }
 
 void ACBCameraCharacter::Tick(float DeltaTime)
@@ -140,22 +140,10 @@ void ACBCameraCharacter::UpdateMovementSpeed()
 
 void ACBCameraCharacter::SetPlacementMode(bool bEnable)
 {
-	if (bPlacementMode == bEnable)
-	{
-		return;
-	}
-	
 	bPlacementMode = bEnable;
 	if (bPlacementMode)
 	{
-		if (UWorld* World = GetWorld())
-		{
-			PlaceableActor = Cast<ACBPlaceableBase>(World->SpawnActor(PlaceableActorBlueprint));
-			if (PlaceableActor)
-			{
-				PlaceableActor->Clickable->DestroyComponent();
-			}
-		}
+		RefreshPlaceableActor();
 	}
 	else
 	{
@@ -166,26 +154,62 @@ void ACBCameraCharacter::SetPlacementMode(bool bEnable)
 	}
 }
 
+void ACBCameraCharacter::RefreshPlaceableActor()
+{
+	if (UWorld* World = GetWorld())
+	{
+		PlaceableActor = Cast<ACBPlaceableBase>(World->SpawnActor(PlaceableActorBlueprint));
+		if (PlaceableActor)
+		{
+			PlaceableActor->Clickable->DestroyComponent();
+		}
+	}
+}
+
 void ACBCameraCharacter::UpdatePlacement()
 {
-	FVector WorldLocation;
-	FVector WorldDirection;
-	PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
-
-	if (const UWorld* World = GetWorld())
+	if (bPlacementMode)
 	{
-		FHitResult HitResult;
-		FVector Start = WorldLocation;
-		FVector End = (WorldDirection * 10000.f) + WorldLocation;
-		World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_GameTraceChannel1);
-		if (HitResult.bBlockingHit)
+		FVector WorldLocation;
+		FVector WorldDirection;
+		PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
+
+		if (const UWorld* World = GetWorld())
 		{
-			if (GridManager)
+			FHitResult HitResult;
+			FVector Start = WorldLocation;
+			FVector End = (WorldDirection * 10000.f) + WorldLocation;
+			World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_GameTraceChannel1);
+			if (HitResult.bBlockingHit)
 			{
-				const FVector Location = GridManager->GetClosestGridCell(HitResult.Location)->GetActorLocation();
-				PlaceableActor->SetActorLocation(Location);
+				if (GridManager)
+				{
+					const FVector Location = GridManager->GetClosestGridCell(HitResult.Location)->GetActorLocation();
+					if (PlaceableActor)
+					{
+						PlaceableActor->SetActorLocation(Location);
+					}
+				}
 			}
 		}
+	}
+}
+
+void ACBCameraCharacter::OnPlacementInfoUpdated(TSubclassOf<ACBPlaceableBase> PlaceableActorType, EBuildingType InPlaceableMode)
+{
+	PlaceableActorBlueprint = PlaceableActorType;
+	PlaceableBuildingType = InPlaceableMode;
+	if (PlaceableBuildingType == EBuildingType::None)
+	{
+		SetPlacementMode(false);
+	}
+	else
+	{
+		if (PlaceableActor)
+		{
+			PlaceableActor->Destroy();
+		}
+		SetPlacementMode(true);
 	}
 }
 
