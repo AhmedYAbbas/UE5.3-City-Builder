@@ -13,6 +13,7 @@ class ACBBuilding;
 class ACBGridManager;
 class ACBPlaceableBase;
 class ACBRoadManager;
+class ACBTimeManager;
 
 struct FInputActionValue;
 
@@ -46,6 +47,12 @@ private:
 	void FreeRoam(const FInputActionValue& Value);
 	UFUNCTION()
 	void SpawnBuilding(const FInputActionValue& Value);
+	UFUNCTION()
+	void SetNormalTimeMode(const FInputActionValue& Value);
+	UFUNCTION()
+	void SetFastTimeMode(const FInputActionValue& Value);
+	UFUNCTION()
+	void SetFastestTimeMode(const FInputActionValue& Value);
 
 	void UpdateMovementSpeed();
 	void SetPlacementMode(bool bEnable);
@@ -79,6 +86,8 @@ private:
 	ACBGridManager* GridManager = nullptr;
 	UPROPERTY()
 	ACBRoadManager* RoadManager = nullptr;
+	UPROPERTY()
+	ACBTimeManager* TimeManager = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;

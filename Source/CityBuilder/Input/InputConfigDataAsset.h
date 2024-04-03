@@ -35,5 +35,11 @@ public:
 	UInputAction* EnableFreeRoamInput;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* PlaceInput;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* NormalTimeInput;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* FastTimeInput;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* FastestTimeInput;
 
 };

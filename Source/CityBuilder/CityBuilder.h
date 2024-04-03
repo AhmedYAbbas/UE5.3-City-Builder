@@ -13,3 +13,12 @@ enum class EBuildingType : uint8
 	Road UMETA(DisplayName = "Road"),
 	BuildingType_Max UMETA(Hidden)
 };
+
+UENUM(BlueprintType)
+enum class ETimeDilation : uint8
+{
+	Normal UMETA(DisplayName = "Normal"),
+	Fast UMETA(DisplayName = "Fast"),
+	Fastest UMETA(DisplayName = "Fastest"),
+	TimeDilation_Max UMETA(Hidden)
+};

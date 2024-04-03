@@ -11,6 +11,7 @@
 #include "CityBuilder/Actors/CBGridCell.h"
 #include "CityBuilder/Actors/CBPlaceableBase.h"
 #include "CityBuilder/Actors/CBRoadManager.h"
+#include "CityBuilder/Actors/CBTimeManager.h"
 #include "CityBuilder/Actors/CBRoadTile.h"
 
 #include "EnhancedInputSubsystems.h"
@@ -37,10 +38,10 @@ void ACBCameraCharacter::BeginPlay()
 
 	GridManager = Cast<ACBGridManager>(UGameplayStatics::GetActorOfClass(this, ACBGridManager::StaticClass()));
 	RoadManager = Cast<ACBRoadManager>(UGameplayStatics::GetActorOfClass(this, ACBRoadManager::StaticClass()));
+	TimeManager = Cast<ACBTimeManager>(UGameplayStatics::GetActorOfClass(this, ACBTimeManager::StaticClass()));
 	InitialMovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
 
 	UpdateMovementSpeed();
-	//SetPlacementMode(true);
 }
 
 void ACBCameraCharacter::Tick(float DeltaTime)
@@ -242,10 +243,33 @@ void ACBCameraCharacter::SpawnBuilding(const FInputActionValue& Value)
 						}
 						PlacedActor->Ploppable->DestroyComponent();
 					}
-					//SetPlacementMode(false);
 				}
 			}
 		}
+	}
+}
+
+void ACBCameraCharacter::SetNormalTimeMode(const FInputActionValue& Value)
+{
+	if (TimeManager)
+	{
+		TimeManager->SetTimeDilationMode(ETimeDilation::Normal);
+	}
+}
+
+void ACBCameraCharacter::SetFastTimeMode(const FInputActionValue& Value)
+{
+	if (TimeManager)
+	{
+		TimeManager->SetTimeDilationMode(ETimeDilation::Fast);
+	}
+}
+
+void ACBCameraCharacter::SetFastestTimeMode(const FInputActionValue& Value)
+{
+	if (TimeManager)
+	{
+		TimeManager->SetTimeDilationMode(ETimeDilation::Fastest);
 	}
 }
 
@@ -271,6 +295,9 @@ void ACBCameraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 					PEI->BindAction(PlayerController->InputData->PitchInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::Pitch);
 					PEI->BindAction(PlayerController->InputData->FreeRoamInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::FreeRoam);
 					PEI->BindAction(PlayerController->InputData->PlaceInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::SpawnBuilding);
+					PEI->BindAction(PlayerController->InputData->NormalTimeInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::SetNormalTimeMode);
+					PEI->BindAction(PlayerController->InputData->FastTimeInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::SetFastTimeMode);
+					PEI->BindAction(PlayerController->InputData->FastestTimeInput, ETriggerEvent::Triggered, this, &ACBCameraCharacter::SetFastestTimeMode);
 				}
 			}
 		}
