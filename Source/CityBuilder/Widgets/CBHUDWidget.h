@@ -8,6 +8,8 @@
 
 class UButton;
 class UImage;
+class UTextBlock;
+class ACBGameModeBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnButtonClickSignature, UButton*, Button);
 
@@ -22,6 +24,8 @@ protected:
 private:
 	UFUNCTION()
 	void OnButtonClicked(UButton* Button);
+	UFUNCTION()
+	void OnPlaceableBought(int32 NewMoney);
 
 protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
@@ -30,10 +34,16 @@ protected:
 	UButton* BuildingButton;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UImage* HighlightImage;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* MoneyText;
 
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)
 	FOnButtonClickSignature OnButtonClickDelegate;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bHighlight = false;
+
+private:
+	UPROPERTY()
+	ACBGameModeBase* GameMode;
 };

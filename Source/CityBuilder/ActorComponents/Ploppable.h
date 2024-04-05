@@ -9,6 +9,8 @@
 class UMaterialInterface;
 class ACBGridManager;
 class ACBGridCell;
+class ACBPlaceableBase;
+class ACBGameModeBase;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CITYBUILDER_API UPloppable : public UActorComponent
@@ -26,6 +28,7 @@ private:
 	void UpdateState();
 	void RoadPlaceableCheck(ACBGridCell* InGridCell);
 	void DisablePlacementAtJunction(ACBGridCell* CenterCell, int FirstCorner, int SecondCorner);
+	void CheckCost();
 
 public:
 	bool bPlacementValid = false;
@@ -33,6 +36,10 @@ public:
 private:
 	UPROPERTY()
 	ACBGridManager* GridManager;
+	UPROPERTY()
+	ACBPlaceableBase* PlaceableOwner;
+	UPROPERTY()
+	ACBGameModeBase* CBGameMode;
 
 	UPROPERTY(EditDefaultsOnly)
 	UMaterialInterface* PloppableMaterial;

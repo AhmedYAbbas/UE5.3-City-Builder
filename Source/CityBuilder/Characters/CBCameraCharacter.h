@@ -14,6 +14,7 @@ class ACBGridManager;
 class ACBPlaceableBase;
 class ACBRoadManager;
 class ACBTimeManager;
+class ACBGameModeBase;
 
 struct FInputActionValue;
 
@@ -88,6 +89,8 @@ private:
 	ACBRoadManager* RoadManager = nullptr;
 	UPROPERTY()
 	ACBTimeManager* TimeManager = nullptr;
+	UPROPERTY()
+	ACBGameModeBase* CBGameMode = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArm;

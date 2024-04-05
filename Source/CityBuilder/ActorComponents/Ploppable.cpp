@@ -5,6 +5,7 @@
 #include "CityBuilder/Actors/CBGridManager.h"
 #include "CityBuilder/Actors/CBGridCell.h"
 #include "CityBuilder/Actors/CBPlaceableBase.h"
+#include "CityBuilder/GameModes/CBGameModeBase.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -20,6 +21,8 @@ void UPloppable::BeginPlay()
 	Super::BeginPlay();
 	
 	GridManager = Cast<ACBGridManager>(UGameplayStatics::GetActorOfClass(this, ACBGridManager::StaticClass()));
+	PlaceableOwner = Cast<ACBPlaceableBase>(GetOwner());
+	CBGameMode = Cast<ACBGameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void UPloppable::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -38,6 +41,7 @@ void UPloppable::UpdateState()
 			{
 				bPlacementValid = Cell->IsOccupied() ? false : true;
 				RoadPlaceableCheck(Cell);
+				CheckCost();
 			}
 		}
 
@@ -76,6 +80,18 @@ void UPloppable::DisablePlacementAtJunction(ACBGridCell* CenterCell, int FirstCo
 				bPlacementValid = false;
 				return;
 			}
+		}
+	}
+}
+
+void UPloppable::CheckCost()
+{
+	if (PlaceableOwner)
+	{
+		if (!CBGameMode->CanAffordPlaceable(PlaceableOwner->Cost))
+		{
+			bPlacementValid = false;
+
 		}
 	}
 }

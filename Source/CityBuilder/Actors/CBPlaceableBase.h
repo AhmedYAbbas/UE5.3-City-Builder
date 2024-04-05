@@ -34,6 +34,8 @@ public:
 	UClickable* Clickable;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UPloppable* Ploppable;
+	UPROPERTY(EditDefaultsOnly)
+	int32 Cost = 0;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

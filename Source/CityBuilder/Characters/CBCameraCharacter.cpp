@@ -13,6 +13,7 @@
 #include "CityBuilder/Actors/CBRoadManager.h"
 #include "CityBuilder/Actors/CBTimeManager.h"
 #include "CityBuilder/Actors/CBRoadTile.h"
+#include "CityBuilder/GameModes/CBGameModeBase.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -39,6 +40,7 @@ void ACBCameraCharacter::BeginPlay()
 	GridManager = Cast<ACBGridManager>(UGameplayStatics::GetActorOfClass(this, ACBGridManager::StaticClass()));
 	RoadManager = Cast<ACBRoadManager>(UGameplayStatics::GetActorOfClass(this, ACBRoadManager::StaticClass()));
 	TimeManager = Cast<ACBTimeManager>(UGameplayStatics::GetActorOfClass(this, ACBTimeManager::StaticClass()));
+	CBGameMode = Cast<ACBGameModeBase>(UGameplayStatics::GetGameMode(this));
 	InitialMovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
 
 	UpdateMovementSpeed();
@@ -240,6 +242,11 @@ void ACBCameraCharacter::SpawnBuilding(const FInputActionValue& Value)
 							{
 								RoadManager->AddRoadTile(RoadTile);
 							}
+						}
+
+						if (CBGameMode)
+						{
+							CBGameMode->BuyPlaceable(PlacedActor->Cost);
 						}
 						PlacedActor->Ploppable->DestroyComponent();
 					}
